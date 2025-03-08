@@ -1,0 +1,11 @@
+      
+      // Get the position of the cannon tip
+      let cannonTipPosition: [number, number, number]
+      
+      if (cannonRef.current) {
+        // Get the world position of the cannon tip
+        const cannonWorldPos = new THREE.Vector3()
+        cannonRef.current.getWorldPosition(cannonWorldPos)
+        cannonTipPosition = [cannonWorldPos.x, cannonWorldPos.y, cannonWorldPos.z]
+      } else {
+        // Fallback calculation if ref is not available
