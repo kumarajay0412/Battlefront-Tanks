@@ -35,6 +35,7 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
               <li>Use <strong>WASD</strong> to rotate your turret (2° per click)</li>
               <li>Hold <strong>Right Mouse Button</strong> to see trajectory prediction</li>
               <li>Press <strong>Spacebar</strong> to fire a cannonball</li>
+              <li><strong>Click on your tank</strong> to select different bullet types</li>
               <li>Destroy enemy tanks to win!</li>
               <li>Burst balloons to earn points!</li>
             </ul>
@@ -46,6 +47,14 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
                 <li>Cannonballs are affected by gravity - aim accordingly!</li>
                 <li>Use the trajectory prediction to line up perfect shots</li>
                 <li>Shoot at balloons to earn bonus points</li>
+              </ul>
+            </div>
+            <div className="bullet-types-instructions">
+              <h3>Special Ammunition:</h3>
+              <ul>
+                <li><strong>Standard Shell</strong> - Unlimited ammo, basic damage</li>
+                <li><strong>Cluster Missile</strong> - 5 shots, splits into 5 smaller missiles on impact</li>
+                <li><strong>Super Bomb</strong> - 3 shots, creates 5 explosions in a large area</li>
               </ul>
             </div>
             <button className="start-button" onClick={onStartGame}>
@@ -96,7 +105,8 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
             <strong>Arrow Keys</strong>: Move | 
             <strong>WASD</strong>: Rotate Turret | 
             <strong>Right-Click</strong>: Show Trajectory | 
-            <strong>Space</strong>: Fire
+            <strong>Space</strong>: Fire | 
+            <strong>Click Tank</strong>: Change Ammo
           </p>
         </div>
       )}

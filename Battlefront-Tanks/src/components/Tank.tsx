@@ -5,9 +5,12 @@ import { Html } from '@react-three/drei'
 import { useKeyboardControls } from '../hooks/useKeyboardControls'
 import Projectile from './Projectile'
 import CannonBall from './CannonBall'
+import Missile from './Missile'
+import SuperBomb from './SuperBomb'
 import TrajectoryPredictor from './TrajectoryPredictor'
 import * as THREE from 'three'
 import { playSound } from '../utils/audio'
+import { BulletType, BULLET_TYPES } from './BulletSelector'
 
 // Define battlefield dimensions as constants for reuse
 const BATTLEFIELD_SIZE = 100
@@ -35,7 +38,21 @@ const Tank: React.FC<TankProps> = ({
 }) => {
   const [tankPosition, setTankPosition] = useState(position)
   const [tankRotation, setTankRotation] = useState(rotation)
-  const [projectiles, setProjectiles] = useState<{ id: number; position: [number, number, number]; direction: [number, number, number]; type: 'missile' | 'cannonball' }[]>([])
+  const [projectiles, setProjectiles] = useState<{ 
+    id: number; 
+    position: [number, number, number]; 
+    direction: [number, number, number]; 
+    type: 'missile' | 'cannonball' | 'superbomb';
+  }[]>([])
+  
+  // Add state for bullet selection
+  const [selectedBulletType, setSelectedBulletType] = useState<BulletType>('standard')
+  const [bulletAmmo, setBulletAmmo] = useState<Record<BulletType, number>>({
+    standard: Infinity,
+    missile: 5,
+    superBomb: 3
+  })
+  const [showBulletSelector, setShowBulletSelector] = useState(false)
   
   // Turret rotation and elevation state
   const [turretRotation, setTurretRotation] = useState(0)
@@ -555,6 +572,22 @@ const Tank: React.FC<TankProps> = ({
     }
   })
   
+  // Add a click handler for the tank to show bullet selector
+  const handleTankClick = () => {
+    if (isCurrentPlayer) {
+      setShowBulletSelector(prev => !prev)
+    }
+  }
+  
+  // Handle bullet selection
+  const handleBulletSelection = (type: BulletType) => {
+    // Only allow selection if there's ammo available
+    if (type === 'standard' || bulletAmmo[type] > 0) {
+      setSelectedBulletType(type)
+      setShowBulletSelector(false)
+    }
+  }
+  
   // Handle shooting
   useEffect(() => {
     // Only shoot if:
@@ -562,7 +595,9 @@ const Tank: React.FC<TankProps> = ({
     // 2. The tank can shoot (cooldown is over)
     // 3. The player is the current player
     // 4. The shoot state has changed from false to true (to detect a new click)
-    if (shoot && canShoot && isCurrentPlayer && !lastShootState.current) {
+    // 5. There's ammo available for the selected bullet type
+    if (shoot && canShoot && isCurrentPlayer && !lastShootState.current && 
+        (selectedBulletType === 'standard' || bulletAmmo[selectedBulletType] > 0)) {
       // Calculate projectile direction based on tank rotation and turret rotation
       const tankYaw = tankRotation[1]
       const combinedRotation = tankYaw + turretRotation
@@ -615,6 +650,13 @@ const Tank: React.FC<TankProps> = ({
         ]
       }
       
+      // Determine projectile type based on selected bullet
+      const projectileType = selectedBulletType === 'standard' 
+        ? 'cannonball' 
+        : selectedBulletType === 'missile' 
+          ? 'missile' 
+          : 'superbomb'
+      
       // Add a new projectile
       setProjectiles(prev => [
         ...prev, 
@@ -622,9 +664,17 @@ const Tank: React.FC<TankProps> = ({
           id: Date.now(), 
           position: cannonTipPosition, 
           direction,
-          type: 'cannonball' as const // Use cannonball type
+          type: projectileType as 'cannonball' | 'missile' | 'superbomb'
         }
       ])
+      
+      // Decrease ammo for special bullets
+      if (selectedBulletType !== 'standard') {
+        setBulletAmmo(prev => ({
+          ...prev,
+          [selectedBulletType]: prev[selectedBulletType] - 1
+        }))
+      }
       
       // Play firing sound
       playSound('bullet_hit', 0.5)
@@ -638,7 +688,7 @@ const Tank: React.FC<TankProps> = ({
     
     // Update the lastShootState ref
     lastShootState.current = shoot
-  }, [shoot, canShoot, isCurrentPlayer, tankPosition, tankRotation, turretRotation, turretElevation])
+  }, [shoot, canShoot, isCurrentPlayer, tankPosition, tankRotation, turretRotation, turretElevation, selectedBulletType, bulletAmmo])
   
   // Ensure turret always faces the firing direction
   useEffect(() => {
@@ -674,7 +724,10 @@ const Tank: React.FC<TankProps> = ({
   return (
     <>
       {/* Tank body with physics - make it visible */}
-      <group ref={physicsRef}>
+      <group 
+        ref={physicsRef} 
+        onClick={handleTankClick}
+      >
         {/* Invisible physics box - needed for collision detection */}
         <mesh castShadow receiveShadow visible={false}>
           <boxGeometry args={[2, 1, 3]} />
@@ -853,6 +906,95 @@ const Tank: React.FC<TankProps> = ({
         </Html>
       </group>
       
+      {/* Bullet type indicator on top of the tank */}
+      <Html position={[tankPosition[0], tankPosition[1] + 3, tankPosition[2]]}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'center',
+          pointerEvents: 'none'
+        }}>
+          {isCurrentPlayer && (
+            <div style={{ 
+              backgroundColor: BULLET_TYPES[selectedBulletType].color,
+              color: 'white',
+              padding: '2px 8px',
+              borderRadius: '10px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              marginBottom: '5px',
+              opacity: 0.8
+            }}>
+              {selectedBulletType !== 'standard' && bulletAmmo[selectedBulletType] > 0 
+                ? `${BULLET_TYPES[selectedBulletType].name}: ${bulletAmmo[selectedBulletType]}`
+                : BULLET_TYPES[selectedBulletType].name
+              }
+            </div>
+          )}
+          
+          {isCurrentPlayer && showBulletSelector && (
+            <div style={{ 
+              display: 'flex', 
+              gap: '5px',
+              backgroundColor: 'rgba(0, 0, 0, 0.7)',
+              padding: '5px',
+              borderRadius: '5px',
+              pointerEvents: 'auto'
+            }}>
+              {Object.values(BULLET_TYPES).map(bulletInfo => {
+                const isSelected = selectedBulletType === bulletInfo.type
+                const ammoCount = bulletInfo.ammo === 'unlimited' ? '∞' : bulletAmmo[bulletInfo.type]
+                const isDisabled = bulletInfo.ammo !== 'unlimited' && bulletAmmo[bulletInfo.type] <= 0
+                
+                return (
+                  <div 
+                    key={bulletInfo.type}
+                    onClick={() => !isDisabled && handleBulletSelection(bulletInfo.type)}
+                    style={{
+                      width: '30px',
+                      height: '30px',
+                      backgroundColor: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.5)',
+                      borderRadius: '50%',
+                      cursor: isDisabled ? 'not-allowed' : 'pointer',
+                      opacity: isDisabled ? 0.5 : 1,
+                      border: `2px solid ${bulletInfo.color}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative'
+                    }}
+                  >
+                    {bulletInfo.type === 'standard' && <span style={{ fontSize: '16px', color: 'white' }}>●</span>}
+                    {bulletInfo.type === 'missile' && <span style={{ fontSize: '16px', color: 'white' }}>▲</span>}
+                    {bulletInfo.type === 'superBomb' && <span style={{ fontSize: '16px', color: 'white' }}>✱</span>}
+                    
+                    {bulletInfo.ammo !== 'unlimited' && (
+                      <div style={{ 
+                        position: 'absolute', 
+                        bottom: '-8px', 
+                        right: '-8px',
+                        backgroundColor: 'black',
+                        color: 'white',
+                        fontSize: '10px',
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}>
+                        {ammoCount}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </Html>
+      
       {/* Add trajectory predictor */}
       {isCurrentPlayer && (
         <TrajectoryPredictor 
@@ -864,26 +1006,41 @@ const Tank: React.FC<TankProps> = ({
         />
       )}
       
-      {/* Render projectiles */}
-      {projectiles.map(projectile => (
-        projectile.type === 'missile' ? (
-          <Projectile
-            key={projectile.id}
-            position={projectile.position}
-            direction={projectile.direction}
-            playerId={playerId}
-            onHit={onHit}
-          />
-        ) : (
-          <CannonBall
-            key={projectile.id}
-            position={projectile.position}
-            direction={projectile.direction}
-            playerId={playerId}
-            onHit={onHit}
-          />
-        )
-      ))}
+      {/* Render projectiles based on their type */}
+      {projectiles.map(projectile => {
+        if (projectile.type === 'cannonball') {
+          return (
+            <CannonBall
+              key={projectile.id}
+              position={projectile.position}
+              direction={projectile.direction}
+              playerId={playerId}
+              onHit={onHit}
+            />
+          )
+        } else if (projectile.type === 'missile') {
+          return (
+            <Missile
+              key={projectile.id}
+              position={projectile.position}
+              direction={projectile.direction}
+              playerId={playerId}
+              onHit={onHit}
+            />
+          )
+        } else if (projectile.type === 'superbomb') {
+          return (
+            <SuperBomb
+              key={projectile.id}
+              position={projectile.position}
+              direction={projectile.direction}
+              playerId={playerId}
+              onHit={onHit}
+            />
+          )
+        }
+        return null
+      })}
     </>
   )
 }
