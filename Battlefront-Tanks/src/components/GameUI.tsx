@@ -6,6 +6,7 @@ interface Player {
   rotation: [number, number, number]
   color: string
   health: number
+  score: number
 }
 
 interface GameState {
@@ -30,19 +31,21 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
           <div className="game-instructions">
             <h2>Instructions:</h2>
             <ul>
-              <li>Use <strong>W, A, S, D</strong> to move your tank</li>
-              <li>Use <strong>Arrow Keys</strong> to aim your turret</li>
+              <li>Use <strong>Arrow Keys</strong> to move your tank</li>
+              <li>Use <strong>WASD</strong> to rotate your turret (2° per click)</li>
               <li>Hold <strong>Right Mouse Button</strong> to see trajectory prediction</li>
               <li>Press <strong>Spacebar</strong> to fire a cannonball</li>
               <li>Destroy enemy tanks to win!</li>
+              <li>Burst balloons to earn points!</li>
             </ul>
             <div className="advanced-instructions">
               <h3>Advanced Controls:</h3>
               <ul>
-                <li>Use <strong>Up/Down Arrows</strong> to adjust cannon elevation</li>
-                <li>Use <strong>Left/Right Arrows</strong> to rotate the turret</li>
+                <li>Use <strong>W/S</strong> to adjust cannon elevation (range: -20° to 90°)</li>
+                <li>Use <strong>A/D</strong> to rotate the turret</li>
                 <li>Cannonballs are affected by gravity - aim accordingly!</li>
                 <li>Use the trajectory prediction to line up perfect shots</li>
+                <li>Shoot at balloons to earn bonus points</li>
               </ul>
             </div>
             <button className="start-button" onClick={onStartGame}>
@@ -75,6 +78,12 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
                 />
               </div>
               <div className="health-text">{player.health}%</div>
+              
+              {/* Score display */}
+              <div className="score-display">
+                <span className="score-label">Score:</span>
+                <span className="score-value">{player.score}</span>
+              </div>
             </div>
           ))}
         </div>
@@ -84,8 +93,8 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
       {gameState.isGameStarted && !gameState.winner && (
         <div className="controls-reminder">
           <p>
-            <strong>WASD</strong>: Move | 
-            <strong>Arrows</strong>: Aim | 
+            <strong>Arrow Keys</strong>: Move | 
+            <strong>WASD</strong>: Rotate Turret | 
             <strong>Right-Click</strong>: Show Trajectory | 
             <strong>Space</strong>: Fire
           </p>
@@ -97,6 +106,14 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
         <div className="game-over">
           <h2>Game Over!</h2>
           <p>Player {gameState.winner} wins!</p>
+          <p>Final Scores:</p>
+          <div className="final-scores">
+            {players.map(player => (
+              <div key={player.id} style={{ color: player.color }}>
+                Player {player.id}: {player.score} points
+              </div>
+            ))}
+          </div>
           <button className="restart-button" onClick={onStartGame}>
             Play Again
           </button>

@@ -39,8 +39,8 @@ const CannonBall: React.FC<CannonBallProps> = ({ position, direction, playerId, 
     position,
     args: [0.5], // radius - larger for a cannonball
     type: 'Dynamic',
-    collisionFilterGroup: 2, // projectile group
-    collisionFilterMask: 1, // collide with tanks and terrain
+    collisionFilterGroup: 1, // projectile group (1)
+    collisionFilterMask: 7, // collide with tanks (1), balloons (2), and houses (4)
     linearDamping: 0.1, // Some air resistance
     angularDamping: 0.1, // Some rotational damping
     material: {
@@ -48,6 +48,9 @@ const CannonBall: React.FC<CannonBallProps> = ({ position, direction, playerId, 
       restitution: 0.3, // Some bounce for the cannonball
     },
     onCollide: (e) => {
+      // Log collision for debugging
+      console.log("Collision detected:", e.body?.userData);
+      
       // Check if we hit a tank
       if (e.body && e.body.userData && e.body.userData.type === 'tank') {
         const targetId = e.body.userData.playerId
@@ -55,6 +58,18 @@ const CannonBall: React.FC<CannonBallProps> = ({ position, direction, playerId, 
         if (targetId !== playerId && onHit) {
           onHit(targetId)
         }
+      }
+      
+      // Check if we hit a balloon
+      if (e.body && e.body.userData && e.body.userData.type === 'balloon') {
+        console.log("Hit balloon with ID:", e.body.userData.id);
+        // Balloons handle their own burst logic in their onCollide handler
+      }
+      
+      // Check if we hit a house - no points should be awarded
+      if (e.body && e.body.userData && e.body.userData.type === 'house') {
+        console.log("Hit house - no points awarded");
+        // Do nothing special for houses
       }
       
       // Use the current tracked position for the fire effect

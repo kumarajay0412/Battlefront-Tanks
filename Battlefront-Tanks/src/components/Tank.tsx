@@ -64,15 +64,15 @@ const Tank: React.FC<TankProps> = ({
   
   // Create a physics-enabled box for the tank body
   const [physicsRef, physicsApi] = useBox(() => ({
-    mass: 5000, // Very high mass for better stability
+    mass: 2000, // Reduced mass for better movement
     position,
     rotation,
     args: [2, 0.8, 3], // width, height, depth - lower height for better stability
     type: 'Dynamic',
     allowSleep: false,
-    linearDamping: 0.9, // High damping to prevent sliding
+    linearDamping: 0.5, // Reduced damping for better movement
     angularDamping: 0.9, // High damping to prevent tipping
-    friction: 1.0, // Maximum friction for better traction
+    friction: 0.5, // Reduced friction for better movement
     restitution: 0.1, // Very low bounciness
     fixedRotation: true, // Prevent rotation on X and Z axes (only allow Y rotation)
     userData: {
@@ -84,53 +84,72 @@ const Tank: React.FC<TankProps> = ({
   // Set up keyboard controls for the current player
   const { moveForward, moveBackward, turnLeft, turnRight, shoot } = useKeyboardControls(isCurrentPlayer)
   
-  // Additional keyboard state for arrow keys
-  const [arrowKeys, setArrowKeys] = useState({
+  // Additional keyboard state for turret control
+  const [turretKeys, setTurretKeys] = useState({
     up: false,
     down: false,
     left: false,
     right: false
   })
   
-  // Set up arrow key controls
+  // Set up direct keyboard controls for movement
+  const [directControls, setDirectControls] = useState({
+    forward: false,
+    backward: false,
+    left: false,
+    right: false
+  });
+  
+  // Set up turret controls with WASD
   useEffect(() => {
     if (!isCurrentPlayer) return
     
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Prevent handling the same keypress multiple times
+      if (e.repeat) return;
+      
       switch (e.key) {
-        case 'ArrowUp':
-          setArrowKeys(prev => ({ ...prev, up: true }))
-          e.preventDefault()
-          break
-        case 'ArrowDown':
-          setArrowKeys(prev => ({ ...prev, down: true }))
-          e.preventDefault()
-          break
-        case 'ArrowLeft':
-          setArrowKeys(prev => ({ ...prev, left: true }))
-          e.preventDefault()
-          break
-        case 'ArrowRight':
-          setArrowKeys(prev => ({ ...prev, right: true }))
-          e.preventDefault()
-          break
+        case 'w': // Use W for turret up
+          // Apply immediate 2 degree rotation instead of setting key state
+          setTurretElevation(prev => {
+            const maxElevation = 90 * Math.PI / 180; // Changed from 70 to 90 degrees in radians
+            const rotationStep = 2 * Math.PI / 180; // 2 degrees in radians
+            return Math.min(prev + rotationStep, maxElevation);
+          });
+          e.preventDefault();
+          break;
+        case 's': // Use S for turret down
+          // Apply immediate 2 degree rotation instead of setting key state
+          setTurretElevation(prev => {
+            const minElevation = -20 * Math.PI / 180; // Changed from -10 to -20 degrees in radians
+            const rotationStep = 2 * Math.PI / 180; // 2 degrees in radians
+            return Math.max(prev - rotationStep, minElevation);
+          });
+          e.preventDefault();
+          break;
+        case 'a': // Use A for turret left
+          // Apply immediate 2 degree rotation instead of setting key state
+          setTurretRotation(prev => prev + (2 * Math.PI / 180)); // 2 degrees in radians
+          e.preventDefault();
+          break;
+        case 'd': // Use D for turret right
+          // Apply immediate 2 degree rotation instead of setting key state
+          setTurretRotation(prev => prev - (2 * Math.PI / 180)); // 2 degrees in radians
+          e.preventDefault();
+          break;
       }
     }
     
     const handleKeyUp = (e: KeyboardEvent) => {
+      // We don't need to handle key up events for discrete movements
+      // But we keep this for compatibility with other controls
       switch (e.key) {
-        case 'ArrowUp':
-          setArrowKeys(prev => ({ ...prev, up: false }))
-          break
-        case 'ArrowDown':
-          setArrowKeys(prev => ({ ...prev, down: false }))
-          break
-        case 'ArrowLeft':
-          setArrowKeys(prev => ({ ...prev, left: false }))
-          break
-        case 'ArrowRight':
-          setArrowKeys(prev => ({ ...prev, right: false }))
-          break
+        case 'w': // Use W for turret up
+        case 's': // Use S for turret down
+        case 'a': // Use A for turret left
+        case 'd': // Use D for turret right
+          // No action needed for key up with discrete movements
+          break;
       }
     }
     
@@ -186,26 +205,94 @@ const Tank: React.FC<TankProps> = ({
     turnLeft, 
     turnRight, 
     shoot,
-    arrowUp: arrowKeys.up,
-    arrowDown: arrowKeys.down,
-    arrowLeft: arrowKeys.left,
-    arrowRight: arrowKeys.right
+    turretUp: turretKeys.up,
+    turretDown: turretKeys.down,
+    turretLeft: turretKeys.left,
+    turretRight: turretKeys.right
   })
   
   // Update debug state when controls change
   useEffect(() => {
     setDebugControls({ 
-      moveForward, 
-      moveBackward, 
-      turnLeft, 
-      turnRight, 
+      moveForward: directControls.forward, 
+      moveBackward: directControls.backward, 
+      turnLeft: directControls.left, 
+      turnRight: directControls.right, 
       shoot,
-      arrowUp: arrowKeys.up,
-      arrowDown: arrowKeys.down,
-      arrowLeft: arrowKeys.left,
-      arrowRight: arrowKeys.right
+      turretUp: turretKeys.up,
+      turretDown: turretKeys.down,
+      turretLeft: turretKeys.left,
+      turretRight: turretKeys.right
     })
-  }, [moveForward, moveBackward, turnLeft, turnRight, shoot, arrowKeys])
+  }, [directControls, shoot, turretKeys])
+  
+  // Direct keyboard handling for movement with arrow keys
+  useEffect(() => {
+    if (!isCurrentPlayer) return;
+    
+    console.log("Setting up DIRECT keyboard controls for tank movement with arrow keys");
+    
+    const handleDirectKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      console.log("Direct key down:", key);
+      
+      switch (key) {
+        case 'arrowup':
+          setDirectControls(prev => ({ ...prev, forward: true }));
+          console.log("DIRECT FORWARD: TRUE");
+          e.preventDefault();
+          break;
+        case 'arrowdown':
+          setDirectControls(prev => ({ ...prev, backward: true }));
+          console.log("DIRECT BACKWARD: TRUE");
+          e.preventDefault();
+          break;
+        case 'arrowleft':
+          setDirectControls(prev => ({ ...prev, left: true }));
+          console.log("DIRECT LEFT: TRUE");
+          e.preventDefault();
+          break;
+        case 'arrowright':
+          setDirectControls(prev => ({ ...prev, right: true }));
+          console.log("DIRECT RIGHT: TRUE");
+          e.preventDefault();
+          break;
+      }
+    };
+    
+    const handleDirectKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      console.log("Direct key up:", key);
+      
+      switch (key) {
+        case 'arrowup':
+          setDirectControls(prev => ({ ...prev, forward: false }));
+          console.log("DIRECT FORWARD: FALSE");
+          break;
+        case 'arrowdown':
+          setDirectControls(prev => ({ ...prev, backward: false }));
+          console.log("DIRECT BACKWARD: FALSE");
+          break;
+        case 'arrowleft':
+          setDirectControls(prev => ({ ...prev, left: false }));
+          console.log("DIRECT LEFT: FALSE");
+          break;
+        case 'arrowright':
+          setDirectControls(prev => ({ ...prev, right: false }));
+          console.log("DIRECT RIGHT: FALSE");
+          break;
+      }
+    };
+    
+    // Add event listeners with capture to ensure they get priority
+    window.addEventListener('keydown', handleDirectKeyDown, { capture: true });
+    window.addEventListener('keyup', handleDirectKeyUp, { capture: true });
+    
+    return () => {
+      window.removeEventListener('keydown', handleDirectKeyDown, { capture: true });
+      window.removeEventListener('keyup', handleDirectKeyUp, { capture: true });
+    };
+  }, [isCurrentPlayer]);
   
   // Helper function to check if a position is within battlefield boundaries
   const isWithinBoundaries = (position: [number, number, number]): boolean => {
@@ -224,6 +311,11 @@ const Tank: React.FC<TankProps> = ({
   useFrame((state, delta) => {
     if (!isCurrentPlayer || !physicsApi) return
     
+    // Debug logging for movement controls
+    if (directControls.forward || directControls.backward || directControls.left || directControls.right) {
+      console.log('DIRECT CONTROLS:', directControls);
+    }
+    
     // Tank movement parameters - increased speeds
     const maxSpeed = 20; // Increased from 10 to 20 for faster movement
     const accelerationFactor = 1.5; // Additional acceleration factor for more responsive movement
@@ -236,6 +328,27 @@ const Tank: React.FC<TankProps> = ({
     physicsApi.velocity.subscribe((v) => {
       currentVelocity.set(v[0], v[1], v[2]);
     });
+    
+    // Get current rotation
+    let currentRotation = new THREE.Euler();
+    physicsApi.rotation.subscribe((r) => {
+      currentRotation.set(r[0], r[1], r[2]);
+    });
+    
+    // Prevent tank from tipping over by constraining rotation on X and Z axes
+    if (Math.abs(currentRotation.x) > 0.1 || Math.abs(currentRotation.z) > 0.1) {
+      console.log('Correcting tank tilt');
+      physicsApi.rotation.set(0, currentRotation.y, 0);
+      
+      // Get current angular velocity
+      let angularVel = [0, 0, 0];
+      physicsApi.angularVelocity.subscribe((v) => {
+        angularVel = v;
+      });
+      
+      // Only keep the Y component of angular velocity
+      physicsApi.angularVelocity.set(0, angularVel[1], 0);
+    }
     
     // Calculate current speed (horizontal only)
     const currentSpeed = Math.sqrt(currentVelocity.x * currentVelocity.x + currentVelocity.z * currentVelocity.z);
@@ -267,8 +380,10 @@ const Tank: React.FC<TankProps> = ({
     
     const isNearBoundary = !isWithinBoundaries(nextPosition);
     
-    // Forward/backward movement with WASD - tank should only move in its forward/backward direction
-    if (moveForward) {
+    // Forward/backward movement with direct controls
+    if (directControls.forward) {
+      console.log('DIRECT: Attempting to move forward');
+      
       // Calculate the next position if we move forward
       const potentialNextPos: [number, number, number] = [
         tankPosition[0] + forward.x * delta * maxSpeed,
@@ -278,12 +393,14 @@ const Tank: React.FC<TankProps> = ({
       
       // Only move forward if it won't take us outside the boundary
       if (isWithinBoundaries(potentialNextPos)) {
+        console.log('DIRECT: Moving forward within boundaries');
+        
         // Apply velocity in the forward direction only - with acceleration
         const targetSpeed = maxSpeed * accelerationFactor;
         const newVelocity = forward.clone().multiplyScalar(targetSpeed);
         
-        // Apply impulse for immediate response
-        const impulse = forward.clone().multiplyScalar(500 * delta);
+        // Apply impulse for immediate response - use a stronger impulse
+        const impulse = forward.clone().multiplyScalar(1500 * delta);
         physicsApi.applyImpulse([impulse.x, 0, impulse.z], [0, 0, 0]);
         
         // Also set velocity directly for consistent speed
@@ -292,10 +409,13 @@ const Tank: React.FC<TankProps> = ({
         // Ensure the physics body is awake
         physicsApi.wakeUp();
       } else {
+        console.log('DIRECT: Cannot move forward - boundary reached');
         // We're trying to move outside the boundary, stop the tank
         physicsApi.velocity.set(0, currentVelocity.y, 0);
       }
-    } else if (moveBackward) {
+    } else if (directControls.backward) {
+      console.log('DIRECT: Attempting to move backward');
+      
       // Calculate the next position if we move backward
       const potentialNextPos: [number, number, number] = [
         tankPosition[0] - forward.x * delta * maxSpeed * 0.8,
@@ -305,12 +425,14 @@ const Tank: React.FC<TankProps> = ({
       
       // Only move backward if it won't take us outside the boundary
       if (isWithinBoundaries(potentialNextPos)) {
+        console.log('DIRECT: Moving backward within boundaries');
+        
         // Apply velocity in the backward direction only - with acceleration
         const targetSpeed = maxSpeed * 0.8; // Backward is slightly slower
         const newVelocity = forward.clone().multiplyScalar(-targetSpeed);
         
-        // Apply impulse for immediate response
-        const impulse = forward.clone().multiplyScalar(-400 * delta);
+        // Apply impulse for immediate response - use a stronger impulse
+        const impulse = forward.clone().multiplyScalar(-1200 * delta);
         physicsApi.applyImpulse([impulse.x, 0, impulse.z], [0, 0, 0]);
         
         // Also set velocity directly for consistent speed
@@ -319,6 +441,7 @@ const Tank: React.FC<TankProps> = ({
         // Ensure the physics body is awake
         physicsApi.wakeUp();
       } else {
+        console.log('DIRECT: Cannot move backward - boundary reached');
         // We're trying to move outside the boundary, stop the tank
         physicsApi.velocity.set(0, currentVelocity.y, 0);
       }
@@ -326,29 +449,16 @@ const Tank: React.FC<TankProps> = ({
       // Stop horizontal movement when not pressing forward/backward
       // Apply stronger braking force for quicker stops
       if (currentSpeed > 0.5) {
-        const brakingForce = currentVelocity.clone().normalize().multiplyScalar(-currentSpeed * 10);
+        const brakingForce = currentVelocity.clone().normalize().multiplyScalar(-currentSpeed * 20); // Increased braking force
         physicsApi.applyForce([brakingForce.x, 0, brakingForce.z], [0, 0, 0]);
       } else {
         physicsApi.velocity.set(0, currentVelocity.y, 0);
       }
     }
     
-    // If we're near or beyond the boundary, apply a force to push the tank back
-    if (isNearBoundary) {
-      // Calculate direction toward center
-      const toCenter = new THREE.Vector3(
-        -tankPosition[0],
-        0,
-        -tankPosition[2]
-      ).normalize();
-      
-      // Apply a force to push the tank back toward the center
-      const bounceForce = toCenter.multiplyScalar(5000 * delta);
-      physicsApi.applyForce([bounceForce.x, 0, bounceForce.z], [0, 0, 0]);
-    }
-    
-    // Left/right rotation with WASD - tank should only rotate in place, not move sideways
-    if (turnLeft) {
+    // Left/right rotation with direct controls
+    if (directControls.left) {
+      console.log('DIRECT: Turning left');
       // Apply stronger rotation for faster turning
       physicsApi.angularVelocity.set(0, turnSpeed, 0);
       
@@ -357,7 +467,8 @@ const Tank: React.FC<TankProps> = ({
       
       // Ensure the physics body is awake
       physicsApi.wakeUp();
-    } else if (turnRight) {
+    } else if (directControls.right) {
+      console.log('DIRECT: Turning right');
       // Apply stronger rotation for faster turning
       physicsApi.angularVelocity.set(0, -turnSpeed, 0);
       
@@ -369,28 +480,6 @@ const Tank: React.FC<TankProps> = ({
     } else {
       // Stop rotation when not turning - apply stronger angular damping
       physicsApi.angularVelocity.set(0, 0, 0);
-    }
-    
-    // Turret rotation with arrow keys
-    if (arrowKeys.left) {
-      // Move 2 degrees per click (convert to radians)
-      const rotationStep = 2 * Math.PI / 180
-      setTurretRotation(prev => prev + rotationStep)
-    } else if (arrowKeys.right) {
-      // Move 2 degrees per click (convert to radians)
-      const rotationStep = 2 * Math.PI / 180
-      setTurretRotation(prev => prev - rotationStep)
-    }
-    
-    // Turret elevation with arrow keys - with new limits
-    if (arrowKeys.up) {
-      // Elevate the cannon (with limit of 70 degrees)
-      const maxElevation = 70 * Math.PI / 180 // 70 degrees in radians
-      setTurretElevation(prev => Math.min(prev + turretElevationSpeed, maxElevation))
-    } else if (arrowKeys.down) {
-      // Lower the cannon (with limit of -10 degrees)
-      const minElevation = -10 * Math.PI / 180 // -10 degrees in radians
-      setTurretElevation(prev => Math.max(prev - turretElevationSpeed, minElevation))
     }
     
     // Update position and rotation state for UI and other calculations

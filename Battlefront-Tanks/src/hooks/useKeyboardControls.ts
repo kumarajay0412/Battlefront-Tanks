@@ -36,24 +36,38 @@ export const useKeyboardControls = (isActive: boolean = true): KeyboardControls 
       
       switch (e.key.toLowerCase()) {
         case 'w':
-          setKeys(prev => ({ ...prev, moveForward: true }))
-          console.log('Move forward: true')
+        case 'arrowup': // Add arrow up as an alternative for forward
+          setKeys(prev => {
+            console.log('Setting moveForward to true');
+            return { ...prev, moveForward: true };
+          });
           break
         case 's':
-          setKeys(prev => ({ ...prev, moveBackward: true }))
-          console.log('Move backward: true')
+        case 'arrowdown': // Add arrow down as an alternative for backward
+          setKeys(prev => {
+            console.log('Setting moveBackward to true');
+            return { ...prev, moveBackward: true };
+          });
           break
         case 'a':
-          setKeys(prev => ({ ...prev, turnLeft: true }))
-          console.log('Turn left: true')
+        case 'arrowleft': // Add arrow left as an alternative for turning left
+          setKeys(prev => {
+            console.log('Setting turnLeft to true');
+            return { ...prev, turnLeft: true };
+          });
           break
         case 'd':
-          setKeys(prev => ({ ...prev, turnRight: true }))
-          console.log('Turn right: true')
+        case 'arrowright': // Add arrow right as an alternative for turning right
+          setKeys(prev => {
+            console.log('Setting turnRight to true');
+            return { ...prev, turnRight: true };
+          });
           break
         case ' ':
-          setKeys(prev => ({ ...prev, shoot: true }))
-          console.log('Shoot: true')
+          setKeys(prev => {
+            console.log('Setting shoot to true');
+            return { ...prev, shoot: true };
+          });
           break
       }
     }
@@ -64,24 +78,38 @@ export const useKeyboardControls = (isActive: boolean = true): KeyboardControls 
       
       switch (e.key.toLowerCase()) {
         case 'w':
-          setKeys(prev => ({ ...prev, moveForward: false }))
-          console.log('Move forward: false')
+        case 'arrowup': // Add arrow up as an alternative for forward
+          setKeys(prev => {
+            console.log('Setting moveForward to false');
+            return { ...prev, moveForward: false };
+          });
           break
         case 's':
-          setKeys(prev => ({ ...prev, moveBackward: false }))
-          console.log('Move backward: false')
+        case 'arrowdown': // Add arrow down as an alternative for backward
+          setKeys(prev => {
+            console.log('Setting moveBackward to false');
+            return { ...prev, moveBackward: false };
+          });
           break
         case 'a':
-          setKeys(prev => ({ ...prev, turnLeft: false }))
-          console.log('Turn left: false')
+        case 'arrowleft': // Add arrow left as an alternative for turning left
+          setKeys(prev => {
+            console.log('Setting turnLeft to false');
+            return { ...prev, turnLeft: false };
+          });
           break
         case 'd':
-          setKeys(prev => ({ ...prev, turnRight: false }))
-          console.log('Turn right: false')
+        case 'arrowright': // Add arrow right as an alternative for turning right
+          setKeys(prev => {
+            console.log('Setting turnRight to false');
+            return { ...prev, turnRight: false };
+          });
           break
         case ' ':
-          setKeys(prev => ({ ...prev, shoot: false }))
-          console.log('Shoot: false')
+          setKeys(prev => {
+            console.log('Setting shoot to false');
+            return { ...prev, shoot: false };
+          });
           break
       }
     }

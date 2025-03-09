@@ -2,12 +2,13 @@ import { Canvas } from '@react-three/fiber'
 import { Sky, OrbitControls, Cloud, Stars } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
 import './App.css'
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 // Components
 import Battlefield from './components/Battlefield'
 import Tank from './components/Tank'
 import GameUI from './components/GameUI'
+import Balloon from './components/Balloon'
 
 // Hooks
 import { useGameState } from './hooks/useGameState'
@@ -17,12 +18,74 @@ const BATTLEFIELD_SIZE = 100
 const BATTLEFIELD_HALF_SIZE = BATTLEFIELD_SIZE / 2
 const BOUNDARY_MARGIN = 10 // Keep tanks this far from the edge
 
-function App() {
-  const { players, gameState, startGame, applyDamage, updatePlayerPosition } = useGameState()
+// Balloon colors and point values
+const BALLOON_COLORS = ['red', 'blue', 'green', 'yellow', 'purple', 'orange']
+const BALLOON_POINTS = [10, 15, 20, 25, 30, 50]
+
+// Generate random balloon positions
+const generateBalloonPositions = (count: number) => {
+  const positions: Array<{
+    position: [number, number, number];
+    color: string;
+    points: number;
+    id: number;
+  }> = []
   
-  // Start the game automatically when the component mounts
+  for (let i = 0; i < count; i++) {
+    // Generate random position within battlefield
+    const x = (Math.random() * 2 - 1) * (BATTLEFIELD_HALF_SIZE - BOUNDARY_MARGIN - 5) // Add extra margin for larger balloons
+    const y = 7 + Math.random() * 12 // Height between 7 and 19 units (increased for larger balloons)
+    const z = (Math.random() * 2 - 1) * (BATTLEFIELD_HALF_SIZE - BOUNDARY_MARGIN - 5) // Add extra margin for larger balloons
+    
+    // Randomly select color and points
+    const colorIndex = Math.floor(Math.random() * BALLOON_COLORS.length)
+    const color = BALLOON_COLORS[colorIndex]
+    const points = BALLOON_POINTS[colorIndex]
+    
+    positions.push({
+      position: [x, y, z],
+      color,
+      points,
+      id: i + 1
+    })
+  }
+  
+  return positions
+}
+
+function App() {
+  // Normal game state
+  const { players, gameState, startGame, applyDamage, updatePlayerPosition, addPoints } = useGameState()
+  
+  // Balloon state
+  const [balloons, setBalloons] = useState<Array<{
+    position: [number, number, number];
+    color: string;
+    points: number;
+    id: number;
+    isBurst: boolean;
+  }>>([])
+  
+  // Handle balloon burst
+  const handleBalloonBurst = useCallback((points: number, balloonId: number) => {
+    console.log("Balloon burst:", balloonId, "Points:", points);
+    
+    // Add points to current player
+    addPoints(points)
+    
+    // Mark balloon as burst
+    setBalloons(prev => 
+      prev.map(balloon => 
+        balloon.id === balloonId 
+          ? { ...balloon, isBurst: true } 
+          : balloon
+      )
+    )
+  }, [addPoints])
+  
+  // Start the normal game automatically when the component mounts
   useEffect(() => {
-    console.log("Starting game automatically")
+    console.log("Starting normal game automatically")
     startGame()
     
     // Calculate safe positions within the battlefield boundaries
@@ -30,21 +93,21 @@ function App() {
     
     // Position players at opposite ends of the map but within boundaries
     // Update each player individually since that's what our hook supports
-    updatePlayerPosition(1, [-safeDistance, 0.5, -safeDistance], [0, Math.PI / 4, 0]);
-    updatePlayerPosition(2, [safeDistance, 0.5, safeDistance], [0, -Math.PI * 3 / 4, 0]);
+    updatePlayerPosition(2, [-safeDistance, 0.5, -safeDistance], [0, Math.PI / 4, 0]);
+    updatePlayerPosition(1, [safeDistance, 0.5, safeDistance], [0, -Math.PI * 3 / 4, 0]);
+    
+    // Generate balloons
+    setBalloons(generateBalloonPositions(15).map(balloon => ({
+      ...balloon,
+      isBurst: false
+    })))
   }, [startGame, updatePlayerPosition])
-  
-  // Debug output for current game state
-  useEffect(() => {
-    console.log("Current game state:", gameState)
-    console.log("Players:", players)
-  }, [gameState, players])
 
   return (
     <div className="app-container">
       <Canvas camera={{ position: [0, 20, 50], fov: 45 }}>
         {/* Enhanced lighting for a more dramatic look */}
-        <ambientLight intensity={0.5} /> {/* Increased ambient light since we're removing shadows */}
+        <ambientLight intensity={0.5} />
         <directionalLight 
           position={[50, 50, 20]} 
           intensity={1.0} 
@@ -72,6 +135,18 @@ function App() {
               health={player.health}
               isCurrentPlayer={gameState.currentPlayer === player.id}
               onHit={(targetId: number) => applyDamage(targetId, 10)}
+            />
+          ))}
+          
+          {/* Balloons */}
+          {balloons.filter(balloon => !balloon.isBurst).map(balloon => (
+            <Balloon
+              key={balloon.id}
+              id={balloon.id}
+              position={balloon.position}
+              color={balloon.color}
+              points={balloon.points}
+              onBurst={(points) => handleBalloonBurst(points, balloon.id)}
             />
           ))}
         </Physics>

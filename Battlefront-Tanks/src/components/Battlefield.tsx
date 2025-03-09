@@ -91,6 +91,7 @@ const House = ({ position, rotation = [0, 0, 0] as [number, number, number], siz
     rotation,
     args: [8 * size, 5 * size, 6 * size], // width, height, depth
     type: 'Static',
+    collisionFilterGroup: 4, // House collision group (4), different from balloons (2)
     userData: {
       type: 'house'
     }
@@ -117,12 +118,7 @@ const House = ({ position, rotation = [0, 0, 0] as [number, number, number], siz
           <meshStandardMaterial color={houseColor} roughness={0.9} />
         </mesh>
         
-        {/* Roof */}
-        <mesh castShadow receiveShadow position={[0, 4.5, 0]} rotation={[0, 0, Math.PI / 4]}>
-          <boxGeometry args={[6, 1.5, 7]} />
-          <meshStandardMaterial color={roofColor} roughness={0.8} />
-        </mesh>
-        
+      
         {/* Door */}
         <mesh castShadow receiveShadow position={[0, 1.5, 3.01]}>
           <boxGeometry args={[1.5, 3, 0.1]} />
@@ -144,7 +140,7 @@ const House = ({ position, rotation = [0, 0, 0] as [number, number, number], siz
           </mesh>
         ))}
         
-        {[-3, 0, 3].map((z, i) => (
+        {[-3, 0].map((z, i) => (
           <mesh key={`window-side-${i}`} castShadow receiveShadow position={[4.01, 2.5, z]}>
             <boxGeometry args={[0.1, 1.2, 1.2]} />
             <meshStandardMaterial color="#87CEEB" roughness={0.4} metalness={0.5} />
@@ -154,11 +150,7 @@ const House = ({ position, rotation = [0, 0, 0] as [number, number, number], siz
         {/* Damage (if damaged) */}
         {isDamaged && (
           <>
-            {/* Hole in the wall */}
-            <mesh castShadow receiveShadow position={[-3, 2, 3.01]}>
-              <circleGeometry args={[1.2, 16]} />
-              <meshStandardMaterial color="black" roughness={1} />
-            </mesh>
+           
             
             {/* Debris around the house */}
             {Array.from({ length: 8 }).map((_, i) => {
@@ -198,49 +190,6 @@ const House = ({ position, rotation = [0, 0, 0] as [number, number, number], siz
           </>
         )}
       </group>
-      
-      {/* Sandbags around the house */}
-      {Array.from({ length: 12 }).map((_, i) => {
-        const angle = (i / 12) * Math.PI * 2
-        const radius = 5 * size
-        return (
-          <mesh 
-            key={`house-sandbag-${i}`}
-            position={[
-              position[0] + Math.cos(angle) * radius,
-              0.2,
-              position[2] + Math.sin(angle) * radius
-            ]}
-            rotation={[0, angle + Math.PI/2, 0]}
-            castShadow
-            receiveShadow
-          >
-            <boxGeometry args={[0.8, 0.4, 0.4]} />
-            <meshStandardMaterial color="#a08060" roughness={1} />
-          </mesh>
-        )
-      })}
-      
-      {/* Craters around the house */}
-      {Array.from({ length: 4 }).map((_, i) => {
-        const angle = (i / 4) * Math.PI * 2 + Math.random() * 0.5
-        const radius = (6 + Math.random() * 3) * size
-        return (
-          <mesh 
-            key={`house-crater-${i}`}
-            position={[
-              position[0] + Math.cos(angle) * radius,
-              -0.2,
-              position[2] + Math.sin(angle) * radius
-            ]}
-            rotation={[Math.PI / 2, 0, 0]}
-            receiveShadow
-          >
-            <cylinderGeometry args={[2 + Math.random() * 1, 3 + Math.random() * 1, 0.8, 16]} />
-            <meshStandardMaterial color="#3d3d3d" roughness={1} />
-          </mesh>
-        )
-      })}
     </group>
   )
 }
@@ -278,6 +227,84 @@ const BarrierPhysics = ({ position, rotation, args }: {
   }))
   return null
 }
+
+// Mountain component for the battlefield
+const Mountain = ({ position = [0, 0, 0], size = 1, detail = 4 }: {
+  position?: [number, number, number];
+  size?: number;
+  detail?: number;
+}) => {
+  // Create a physics-enabled mountain
+  const [ref] = useBox(() => ({
+    mass: 0,
+    position,
+    args: [size * 20, size * 15, size * 20],
+    type: 'Static',
+    userData: { type: 'mountain' }
+  }))
+
+  // Generate mountain geometry
+  const generateMountainGeometry = () => {
+    // Create a cone geometry for the mountain base
+    const geometry = new THREE.ConeGeometry(size * 10, size * 15, 8, detail);
+    
+    // Modify vertices to make it look more natural
+    const positionAttribute = geometry.getAttribute('position');
+    const vertex = new THREE.Vector3();
+    
+    for (let i = 0; i < positionAttribute.count; i++) {
+      vertex.fromBufferAttribute(positionAttribute, i);
+      
+      // Skip modifying the top vertex
+      if (vertex.y < size * 15 - 0.1) {
+        // Add some noise to x and z
+        const noise = (Math.random() - 0.5) * size * 2;
+        vertex.x += noise;
+        vertex.z += noise;
+        
+        // Add some noise to y based on height
+        const heightNoise = Math.random() * size * 1.5 * (1 - vertex.y / (size * 15));
+        vertex.y -= heightNoise;
+      }
+      
+      positionAttribute.setXYZ(i, vertex.x, vertex.y, vertex.z);
+    }
+    
+    geometry.computeVertexNormals();
+    return geometry;
+  };
+
+  return (
+    <group position={position}>
+      {/* Mountain physics collider (invisible) */}
+      <mesh ref={ref} visible={false}>
+        <boxGeometry args={[size * 20, size * 15, size * 20]} />
+        <meshStandardMaterial wireframe />
+      </mesh>
+      
+      {/* Mountain visual mesh */}
+      <mesh castShadow receiveShadow position={[0, size * 7.5, 0]}>
+        <primitive object={generateMountainGeometry()} />
+        <meshStandardMaterial 
+          color="#6b6b6b" 
+          roughness={0.9}
+          metalness={0.1}
+          flatShading
+        />
+      </mesh>
+      
+      {/* Snow cap on top of the mountain */}
+      <mesh castShadow receiveShadow position={[0, size * 12, 0]}>
+        <coneGeometry args={[size * 4, size * 3, 8, 1]} />
+        <meshStandardMaterial 
+          color="#ffffff" 
+          roughness={0.8}
+          metalness={0.1}
+        />
+      </mesh>
+    </group>
+  );
+};
 
 const Battlefield = () => {
   // Create a physics-enabled ground plane
@@ -358,6 +385,13 @@ const Battlefield = () => {
           displacementBias={-0.5}
         />
       </mesh>
+      
+      {/* Add a mountain to the battlefield */}
+      <Mountain 
+        position={[-BATTLEFIELD_HALF_SIZE * 0.6, 0, -BATTLEFIELD_HALF_SIZE * 0.6]} 
+        size={1.5}
+        detail={6}
+      />
       
       {/* Invisible boundary walls to keep objects within the battlefield */}
       {/* North wall */}

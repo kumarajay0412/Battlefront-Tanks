@@ -6,6 +6,7 @@ export interface Player {
   rotation: [number, number, number]
   color: string
   health: number
+  score: number
 }
 
 export interface GameState {
@@ -17,8 +18,8 @@ export interface GameState {
 export const useGameState = () => {
   // Initialize players
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, position: [0, 0.5, 5], rotation: [0, 0, 0], color: 'red', health: 100 },
-    { id: 2, position: [5, 0.5, 0], rotation: [0, -Math.PI / 2, 0], color: 'blue', health: 100 }
+    { id: 1, position: [0, 0.5, 5], rotation: [0, 0, 0], color: 'red', health: 100, score: 0 },
+    { id: 2, position: [5, 0.5, 0], rotation: [0, -Math.PI / 2, 0], color: 'blue', health: 100, score: 0 }
   ])
   
   // Initialize game state
@@ -31,8 +32,8 @@ export const useGameState = () => {
   // Start or restart the game
   const startGame = useCallback(() => {
     setPlayers([
-      { id: 1, position: [0, 0.5, 5], rotation: [0, 0, 0], color: 'red', health: 100 },
-      { id: 2, position: [5, 0.5, 0], rotation: [0, -Math.PI / 2, 0], color: 'blue', health: 100 }
+      { id: 1, position: [0, 0.5, 5], rotation: [0, 0, 0], color: 'red', health: 100, score: 0 },
+      { id: 2, position: [5, 0.5, 0], rotation: [0, -Math.PI / 2, 0], color: 'blue', health: 100, score: 0 }
     ])
     
     setGameState({
@@ -97,12 +98,25 @@ export const useGameState = () => {
     )
   }, [])
   
+  // Add points to the current player's score
+  const addPoints = useCallback((points: number) => {
+    setPlayers(prev => 
+      prev.map(player => {
+        if (player.id === gameState.currentPlayer) {
+          return { ...player, score: player.score + points }
+        }
+        return player
+      })
+    )
+  }, [gameState.currentPlayer])
+  
   return {
     players,
     gameState,
     startGame,
     nextTurn,
     applyDamage,
-    updatePlayerPosition
+    updatePlayerPosition,
+    addPoints
   }
 } 
