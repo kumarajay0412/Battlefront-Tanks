@@ -346,8 +346,8 @@ const Battlefield = () => {
       const x = (i / terrainResolution - 0.5) * terrainSize
       const z = (j / terrainResolution - 0.5) * terrainSize
       
-      // Base height
-      let height = 0
+      // Base height - raised slightly to be above water
+      let height = 0.5
       
       // Add some gentle hills
       height += Math.sin(x * 0.05) * Math.cos(z * 0.05) * 0.5
@@ -355,10 +355,12 @@ const Battlefield = () => {
       // Add some noise
       height += (Math.random() * 2 - 1) * 0.1
       
-      // Make the edges higher (like a battlefield arena)
+      // Make the edges slope down to the water (island effect)
       const distanceFromCenter = Math.sqrt(x * x + z * z)
       const edgeFactor = Math.max(0, distanceFromCenter - terrainSize * 0.3) / (terrainSize * 0.2)
-      height += edgeFactor * 2
+      
+      // Apply island shape - higher in center, sloping down at edges
+      height = Math.max(0, height - edgeFactor * 2)
       
       // Store the height
       terrainHeightMap[index] = height
@@ -381,8 +383,18 @@ const Battlefield = () => {
             THREE.RedFormat,
             THREE.FloatType
           )}
-          displacementScale={2}
-          displacementBias={-0.5}
+          displacementScale={2.5}
+          displacementBias={0}
+        />
+      </mesh>
+      
+      {/* Add a sandy beach around the edges */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 0]}>
+        <ringGeometry args={[BATTLEFIELD_SIZE * 0.4, BATTLEFIELD_SIZE * 0.5, 64]} />
+        <meshStandardMaterial 
+          color="#e6d298" 
+          roughness={1.0}
+          metalness={0.0}
         />
       </mesh>
       

@@ -9,6 +9,7 @@ import Battlefield from './components/Battlefield'
 import Tank from './components/Tank'
 import GameUI from './components/GameUI'
 import Balloon from './components/Balloon'
+import Water from './components/Water'
 
 // Hooks
 import { useGameState } from './hooks/useGameState'
@@ -105,12 +106,20 @@ function App() {
 
   return (
     <div className="app-container">
-      <Canvas camera={{ position: [0, 20, 50], fov: 45 }}>
+      <Canvas camera={{ position: [0, 30, 60], fov: 45 }}>
         {/* Enhanced lighting for a more dramatic look */}
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.6} />
         <directionalLight 
           position={[50, 50, 20]} 
-          intensity={1.0} 
+          intensity={1.2}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-camera-far={100}
+          shadow-camera-left={-50}
+          shadow-camera-right={50}
+          shadow-camera-top={50}
+          shadow-camera-bottom={-50}
         />
         
         {/* Physics world */}
@@ -123,6 +132,14 @@ function App() {
         >
           {/* Battlefield with terrain, trees, and other elements */}
           <Battlefield />
+          
+          {/* Ocean water surrounding the battlefield */}
+          <Water 
+            position={[0, -1, 0]} 
+            size={500} 
+            color="#4a95e6" 
+            waveSpeed={0.3}
+          />
           
           {/* Player tanks */}
           {players.map(player => (
@@ -157,6 +174,7 @@ function App() {
           sunPosition={[5, 1, 8]} 
           inclination={0.5} 
           azimuth={0.25} 
+          rayleigh={0.5}
         />
         
         {/* Add some clouds for atmosphere */}
