@@ -669,4 +669,4 @@ const Battlefield = () => {
   )
 }
 
-export default Battlefield 
+export default Battlefield
