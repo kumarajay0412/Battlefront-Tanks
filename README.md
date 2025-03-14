@@ -2,7 +2,8 @@
 
 A thrilling 3D tank game where you shoot colorful balloons in a beautiful environment within a time limit. Built with React Three Fiber and Supabase for score tracking.
 
-![Battlefront Tanks Game](./screenshot.png)
+> 🎮 Check out the announcement tweet [here](https://x.com/Kumar_ajay0412/status/1900591183329693818)!
+
 
 ## 🎯 Game Overview
 
