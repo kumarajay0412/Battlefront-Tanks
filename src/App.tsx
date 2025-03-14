@@ -171,7 +171,6 @@ function App() {
   }>>([])
   
   // Remove cloud animation state since we don't need it anymore
-  const cloudPositions = CLOUD_CONFIGS.map(config => config.position)
   
   // Handle balloon burst
   const handleBalloonBurst = useCallback((points: number, balloonId: number) => {
@@ -414,6 +413,8 @@ function App() {
               segments={config.segments}
               scale={config.scale}
               color="#ffffff"
+              seed={index}
+              fade={0}
             />
           ))}
           
