@@ -2,8 +2,11 @@
 
 A thrilling 3D tank game where you shoot colorful balloons in a beautiful environment within a time limit. Built with React Three Fiber and Supabase for score tracking.
 
-> 🎮 Check out the announcement tweet [here](https://x.com/Kumar_ajay0412/status/1900591183329693818)!
 
+
+> 🎮 Check out the announcement tweet [here](https://x.com/Kumar_ajay0412/status/1900591183329693818)!
+![Image](https://github.com/user-attachments/assets/098f3f87-d14c-4c7d-8bfe-4b109b00f044)
+![Image](https://github.com/user-attachments/assets/71cea82f-a071-4525-a151-e88139211d81)
 
 ## 🎯 Game Overview
 
