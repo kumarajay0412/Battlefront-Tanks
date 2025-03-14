@@ -3,7 +3,7 @@ import { Sky, OrbitControls, Cloud, Stars, PerspectiveCamera } from '@react-thre
 import { Physics } from '@react-three/cannon'
 import './App.css'
 import { useEffect, useState, useCallback, memo, useRef } from 'react'
-import * as THREE from 'three'
+import { Analytics } from "@vercel/analytics/react"
 import { UserRegistration } from './components/UserRegistration'
 import { GameOver } from './components/GameOver'
 import { supabase } from './lib/supabase'
@@ -42,37 +42,37 @@ const CLOUD_CONFIGS = [
 
 // Balloon configurations with pastel colors and different shapes
 const BALLOON_CONFIGS = [
-  { 
+  {
     color: '#FFB3BA', // Pastel Pink
     points: 10,
     variant: 'classic' as BalloonVariant,
     scale: 1.0
   },
-  { 
+  {
     color: '#BAFFC9', // Pastel Green
     points: 15,
     variant: 'teardrop' as BalloonVariant,
     scale: 1.2
   },
-  { 
+  {
     color: '#BAE1FF', // Pastel Blue
     points: 20,
     variant: 'tiered' as BalloonVariant,
     scale: 1.1
   },
-  { 
+  {
     color: '#FFFFBA', // Pastel Yellow
     points: 25,
     variant: 'heart' as BalloonVariant,
     scale: 1.3
   },
-  { 
+  {
     color: '#E0BBE4', // Pastel Purple
     points: 30,
     variant: 'elongated' as BalloonVariant,
     scale: 1.15
   },
-  { 
+  {
     color: '#FFD4BA', // Pastel Orange
     points: 50,
     variant: 'classic' as BalloonVariant,
@@ -90,24 +90,24 @@ const generateBalloonPositions = (count: number) => {
     variant: BalloonVariant;
     scale: number;
   }> = []
-  
+
   // Create a grid-like distribution for better visibility
   const gridSize = Math.ceil(Math.sqrt(count))
   const spacing = (BATTLEFIELD_SIZE - BOUNDARY_MARGIN * 2) / gridSize
-  
+
   for (let i = 0; i < count; i++) {
     // Calculate grid position
     const row = Math.floor(i / gridSize)
     const col = i % gridSize
-    
+
     // Add some randomness to the grid position
     const x = -BATTLEFIELD_HALF_SIZE + BOUNDARY_MARGIN + col * spacing + (Math.random() - 0.5) * spacing
     const y = 15 + Math.random() * 5 // Height between 15 and 25 units
     const z = -BATTLEFIELD_HALF_SIZE + BOUNDARY_MARGIN + row * spacing + (Math.random() - 0.5) * spacing
-    
+
     // Randomly select balloon configuration
     const config = BALLOON_CONFIGS[Math.floor(Math.random() * BALLOON_CONFIGS.length)]
-    
+
     positions.push({
       position: [x, y, z],
       color: config.color,
@@ -117,7 +117,7 @@ const generateBalloonPositions = (count: number) => {
       id: i + 1
     })
   }
-  
+
   return positions
 }
 
@@ -140,7 +140,7 @@ function App() {
   const [timeLeft, setTimeLeft] = useState<number>(60);
   const timerRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const isSubmittingRef = useRef<boolean>(false); // Flag to prevent duplicate submissions
-  
+
   // FPS counter
   useEffect(() => {
     const interval = setInterval(() => {
@@ -169,32 +169,32 @@ function App() {
     variant: BalloonVariant;
     scale: number;
   }>>([])
-  
+
   // Remove cloud animation state since we don't need it anymore
-  
+
   // Handle balloon burst
   const handleBalloonBurst = useCallback((points: number, balloonId: number) => {
     console.log("Balloon burst:", balloonId, "Points:", points)
-    
+
     // Add points to player
     addPoints(points)
-    
+
     // Update score
     setScore(prevScore => {
       const newScore = prevScore + points;
       return newScore;
     });
-    
+
     // Mark balloon as burst
-    setBalloons(prev => 
-      prev.map(balloon => 
-        balloon.id === balloonId 
-          ? { ...balloon, isBurst: true } 
+    setBalloons(prev =>
+      prev.map(balloon =>
+        balloon.id === balloonId
+          ? { ...balloon, isBurst: true }
           : balloon
       )
     )
   }, [addPoints])
-  
+
   // Background music effect
   useEffect(() => {
     // Create audio element
@@ -217,13 +217,13 @@ function App() {
       }
     }
   }, [gameState.isGameStarted])
-  
+
   // Start game effect
   useEffect(() => {
     if (gameState.isGameStarted) {
       // Position player at the center of the map
       updatePlayerPosition(1, [1, 0.5, 0], [0, 0, 0])
-      
+
       // Generate more balloons for better gameplay
       setBalloons(generateBalloonPositions(20).map(balloon => ({
         ...balloon,
@@ -266,12 +266,12 @@ function App() {
 
     isSubmittingRef.current = true;
     setGameOver(true);
-    
+
     try {
       const { error } = await supabase
         .from('scores')
-        .insert([{ 
-          user_name: userName, 
+        .insert([{
+          user_name: userName,
           score: score,
         }]);
 
@@ -308,9 +308,9 @@ function App() {
       {!gameStarted && (
         <UserRegistration onRegister={handleRegister} />
       )}
-
+      <Analytics />
       {gameOver && (
-        <GameOver 
+        <GameOver
           score={score}
           userName={userName}
           onRestart={handleRestart}
@@ -321,7 +321,7 @@ function App() {
         <Canvas>
           {/* Default Camera Setup */}
           <PerspectiveCamera makeDefault position={[0, 30, 60]} fov={45} />
-          <OrbitControls 
+          <OrbitControls
             enablePan={true}
             enableZoom={true}
             enableRotate={true}
@@ -332,8 +332,8 @@ function App() {
 
           {/* Enhanced lighting for a more dramatic look */}
           <ambientLight intensity={0.6} />
-          <directionalLight 
-            position={[50, 50, 20]} 
+          <directionalLight
+            position={[50, 50, 20]}
             intensity={1.2}
             castShadow
             shadow-mapSize-width={2048}
@@ -344,10 +344,10 @@ function App() {
             shadow-camera-top={50}
             shadow-camera-bottom={-50}
           />
-          
+
           {/* Physics world */}
-          <Physics 
-            gravity={[0, -9.8, 0]} 
+          <Physics
+            gravity={[0, -9.8, 0]}
             defaultContactMaterial={{
               friction: 0.5,
               restitution: 0.1,
@@ -355,15 +355,15 @@ function App() {
           >
             {/* Battlefield with terrain */}
             <MemoizedBattlefield />
-            
+
             {/* Ocean water surrounding the battlefield */}
-            <MemoizedWater 
-              position={[0, -1, 0]} 
-              size={500} 
-              color="#4a95e6" 
+            <MemoizedWater
+              position={[0, -1, 0]}
+              size={500}
+              color="#4a95e6"
               waveSpeed={0.3}
             />
-            
+
             {/* Player tank */}
             {gameState.isGameStarted && (
               <MemoizedTank
@@ -374,10 +374,10 @@ function App() {
                 playerId={players[0].id}
                 health={players[0].health}
                 isCurrentPlayer={true}
-                onHit={() => {}}
+                onHit={() => { }}
               />
             )}
-            
+
             {/* Balloons with different shapes and colors */}
             {balloons.map(balloon => (
               <MemoizedBalloon
@@ -393,16 +393,16 @@ function App() {
               />
             ))}
           </Physics>
-          
+
           {/* Environment */}
-          <Sky 
-            distance={450000} 
-            sunPosition={[5, 1, 8]} 
-            inclination={0.5} 
-            azimuth={0.25} 
+          <Sky
+            distance={450000}
+            sunPosition={[5, 1, 8]}
+            inclination={0.5}
+            azimuth={0.25}
             rayleigh={0.5}
           />
-          
+
           {/* Static clouds */}
           {CLOUD_CONFIGS.map((config, index) => (
             <Cloud
@@ -417,11 +417,11 @@ function App() {
               fade={0}
             />
           ))}
-          
+
           {/* Add stars for a more dramatic sky */}
           <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade />
         </Canvas>
-        
+
         {/* FPS Counter */}
         <div style={{
           position: 'absolute',
@@ -439,9 +439,9 @@ function App() {
         }}>
           {fps} FPS
         </div>
-        
+
         {/* Game UI */}
-        <GameUI 
+        <GameUI
           players={players}
           gameState={gameState}
           onStartGame={startGame}
