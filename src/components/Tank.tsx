@@ -334,9 +334,9 @@ const Tank: React.FC<TankProps> = ({
     }
     
     // Tank movement parameters - increased speeds
-    const maxSpeed = 20; // Increased from 10 to 20 for faster movement
-    const accelerationFactor = 1.5; // Additional acceleration factor for more responsive movement
-    const turnSpeed = 2.0; // Increased from 1.5 to 2.0 for faster turning
+    const maxSpeed = 30; // Increased from 20 to 30 for even faster movement
+    const accelerationFactor = 2.0; // Increased from 1.5 to 2.0 for more responsive movement
+    const turnSpeed = 2.5; // Increased from 2.0 to 2.5 for faster turning
     const turretRotationSpeed = 1.5 * delta;
     const turretElevationSpeed = 1.0 * delta;
     
@@ -736,16 +736,26 @@ const Tank: React.FC<TankProps> = ({
         
         {/* Tank body made of shapes */}
         <group position={[0, 0, 0]}>
-          {/* Tank base/chassis */}
+          {/* Tank base/chassis - made more angular and military-looking */}
           <mesh ref={bodyRef} castShadow receiveShadow>
-            <boxGeometry args={[2, 0.5, 3]} />
-            <meshStandardMaterial color={color} />
+            <boxGeometry args={[2.2, 0.6, 3.2]} /> {/* Slightly larger and taller */}
+            <meshStandardMaterial color="#4B5320" roughness={0.7} metalness={0.3} /> {/* Military green with metallic finish */}
           </mesh>
           
-          {/* Tank upper body */}
-          <mesh position={[0, 0.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[1.8, 0.4, 2.5]} />
-            <meshStandardMaterial color={color} />
+          {/* Tank upper body - more angular with armor plates */}
+          <mesh position={[0, 0.6, 0]} castShadow receiveShadow>
+            <boxGeometry args={[2.0, 0.5, 2.7]} />
+            <meshStandardMaterial color="#4B5320" roughness={0.7} metalness={0.3} />
+          </mesh>
+          
+          {/* Additional armor plates */}
+          <mesh position={[0.9, 0.3, 0]} rotation={[0, 0, Math.PI / 6]} castShadow>
+            <boxGeometry args={[0.8, 0.2, 2.5]} />
+            <meshStandardMaterial color="#3B4219" roughness={0.8} metalness={0.2} />
+          </mesh>
+          <mesh position={[-0.9, 0.3, 0]} rotation={[0, 0, -Math.PI / 6]} castShadow>
+            <boxGeometry args={[0.8, 0.2, 2.5]} />
+            <meshStandardMaterial color="#3B4219" roughness={0.8} metalness={0.2} />
           </mesh>
           
           {/* Front indicator - a small triangle/arrow to show the front direction */}
@@ -799,29 +809,29 @@ const Tank: React.FC<TankProps> = ({
             
             {/* Tank tracks (enhanced with segments) */}
             <group position={[-1.1, -0.3, 0]}>
-              {/* Bottom track section */}
-              {Array.from({ length: 10 }).map((_, i) => (
+              {/* Bottom track section - made darker and more metallic */}
+              {Array.from({ length: 12 }).map((_, i) => (
                 <mesh 
                   key={`left-track-bottom-${i}`} 
-                  position={[0, -0.2, -1.4 + i * 0.3]} 
+                  position={[0, -0.2, -1.4 + i * 0.25]} 
                   rotation={[0, 0, Math.PI/2 + wheelRotation * 0.2 + i * 0.05]} 
                   castShadow
                 >
-                  <boxGeometry args={[0.05, 0.25, 0.2]} />
-                  <meshStandardMaterial color="#222222" metalness={0.8} roughness={0.6} />
+                  <boxGeometry args={[0.06, 0.3, 0.2]} />
+                  <meshStandardMaterial color="#1A1A1A" metalness={0.9} roughness={0.4} />
                 </mesh>
               ))}
               
               {/* Top track section */}
-              {Array.from({ length: 10 }).map((_, i) => (
+              {Array.from({ length: 12 }).map((_, i) => (
                 <mesh 
                   key={`left-track-top-${i}`} 
-                  position={[0, 0.1, -1.4 + i * 0.3]} 
+                  position={[0, 0.1, -1.4 + i * 0.25]} 
                   rotation={[0, 0, Math.PI/2 + wheelRotation * 0.2 - i * 0.05]} 
                   castShadow
                 >
-                  <boxGeometry args={[0.05, 0.25, 0.2]} />
-                  <meshStandardMaterial color="#222222" metalness={0.8} roughness={0.6} />
+                  <boxGeometry args={[0.06, 0.3, 0.2]} />
+                  <meshStandardMaterial color="#1A1A1A" metalness={0.9} roughness={0.4} />
                 </mesh>
               ))}
             </group>
@@ -855,32 +865,39 @@ const Tank: React.FC<TankProps> = ({
             </group>
           </group>
           
-          {/* Tank turret (can rotate 360 degrees) */}
-          <group ref={turretRef} position={[0, 0.9, 0]}>
+          {/* Tank turret - made more angular and armored */}
+          <group ref={turretRef} position={[0, 1.0, 0]}>
             {/* Turret base */}
             <mesh castShadow>
-              <cylinderGeometry args={[0.8, 0.9, 0.5, 16]} />
-              <meshStandardMaterial color={color} />
+              <cylinderGeometry args={[0.9, 1.0, 0.6, 8]} /> {/* Made octagonal with 8 sides */}
+              <meshStandardMaterial color="#4B5320" roughness={0.7} metalness={0.3} />
             </mesh>
             
-            {/* Turret top */}
-            <mesh position={[0, 0.3, 0]} castShadow>
-              <sphereGeometry args={[0.7, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
-              <meshStandardMaterial color={color} />
+            {/* Turret armor plates */}
+            <mesh position={[0, 0.2, -0.4]} rotation={[0.2, 0, 0]} castShadow>
+              <boxGeometry args={[1.6, 0.3, 0.8]} />
+              <meshStandardMaterial color="#3B4219" roughness={0.8} metalness={0.2} />
             </mesh>
             
-            {/* Tank cannon (can move up and down) */}
+            {/* Tank cannon - made longer and more detailed */}
             <group position={[0, 0.2, 0]}>
               <group ref={cannonRef}>
-                <mesh position={[0, 0, -0.8]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-                  <cylinderGeometry args={[0.15, 0.15, 1.5, 16]} />
-                  <meshStandardMaterial color="darkgray" />
+                {/* Main cannon barrel */}
+                <mesh position={[0, 0, -1.0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+                  <cylinderGeometry args={[0.18, 0.18, 2.0, 16]} />
+                  <meshStandardMaterial color="#2A2A2A" metalness={0.8} roughness={0.3} />
                 </mesh>
                 
-                {/* Cannon tip (visual indicator of firing direction) */}
-                <mesh position={[0, 0, -1.6]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-                  <cylinderGeometry args={[0.17, 0.1, 0.2, 16]} />
-                  <meshStandardMaterial color="black" />
+                {/* Cannon reinforcement */}
+                <mesh position={[0, 0, -0.5]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+                  <cylinderGeometry args={[0.22, 0.22, 0.5, 16]} />
+                  <meshStandardMaterial color="#1A1A1A" metalness={0.8} roughness={0.3} />
+                </mesh>
+                
+                {/* Muzzle brake */}
+                <mesh position={[0, 0, -2.0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+                  <cylinderGeometry args={[0.22, 0.15, 0.3, 16]} />
+                  <meshStandardMaterial color="#1A1A1A" metalness={0.8} roughness={0.3} />
                 </mesh>
               </group>
             </group>

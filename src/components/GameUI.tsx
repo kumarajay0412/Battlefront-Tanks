@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 
 interface Player {
   id: number
@@ -7,21 +7,39 @@ interface Player {
   color: string
   health: number
   score: number
+  name: string
 }
 
 interface GameState {
   isGameStarted: boolean
   winner: number | null
   currentPlayer: number
+  timeRemaining: number
+  isGameOver: boolean
 }
 
 interface GameUIProps {
   players: Player[]
   gameState: GameState
-  onStartGame: () => void
+  onStartGame: (playerName: string) => void
 }
 
 const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
+  const [playerName, setPlayerName] = useState('')
+  
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60)
+    const remainingSeconds = seconds % 60
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  const handleStartGame = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (playerName.trim()) {
+      onStartGame(playerName.trim())
+    }
+  }
+
   return (
     <div className="game-ui">
       {/* Game title and instructions */}
@@ -36,70 +54,30 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
               <li>Hold <strong>Right Mouse Button</strong> to see trajectory prediction</li>
               <li>Press <strong>Spacebar</strong> to fire a cannonball</li>
               <li><strong>Click on your tank</strong> to select different bullet types</li>
-              <li>Destroy enemy tanks to win!</li>
               <li>Burst balloons to earn points!</li>
+              <li>You have <strong>2 minutes</strong> to score as many points as possible!</li>
             </ul>
-            <div className="advanced-instructions">
-              <h3>Advanced Controls:</h3>
-              <ul>
-                <li>Use <strong>W/S</strong> to adjust cannon elevation (range: -20° to 90°)</li>
-                <li>Use <strong>A/D</strong> to rotate the turret</li>
-                <li>Cannonballs are affected by gravity - aim accordingly!</li>
-                <li>Use the trajectory prediction to line up perfect shots</li>
-                <li>Shoot at balloons to earn bonus points</li>
-              </ul>
-            </div>
-            <div className="bullet-types-instructions">
-              <h3>Special Ammunition:</h3>
-              <ul>
-                <li><strong>Standard Shell</strong> - Unlimited ammo, basic damage</li>
-                <li><strong>Cluster Missile</strong> - 5 shots, splits into 5 smaller missiles on impact</li>
-                <li><strong>Super Bomb</strong> - 3 shots, creates 5 explosions in a large area</li>
-              </ul>
-            </div>
-            <button className="start-button" onClick={onStartGame}>
-              Start Game
-            </button>
+            
+            <form onSubmit={handleStartGame} className="player-name-form">
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                placeholder="Enter your name"
+                required
+                className="player-name-input"
+              />
+              <button type="submit" className="start-button" disabled={!playerName.trim()}>
+                Start Game
+              </button>
+            </form>
           </div>
         )}
       </div>
       
-      {/* Player stats */}
-      {gameState.isGameStarted && (
-        <div className="player-stats">
-          {players.map(player => (
-            <div 
-              key={player.id} 
-              className={`player-stat ${gameState.currentPlayer === player.id ? 'active-player' : ''}`}
-              style={{ borderColor: player.color }}
-            >
-              <div className="player-name" style={{ color: player.color }}>
-                Player {player.id}
-                {gameState.currentPlayer === player.id && <span> (Your Turn)</span>}
-              </div>
-              <div className="health-bar-container">
-                <div 
-                  className="health-bar" 
-                  style={{ 
-                    width: `${player.health}%`,
-                    backgroundColor: player.health > 50 ? 'green' : player.health > 25 ? 'orange' : 'red'
-                  }}
-                />
-              </div>
-              <div className="health-text">{player.health}%</div>
-              
-              {/* Score display */}
-              <div className="score-display">
-                <span className="score-label">Score:</span>
-                <span className="score-value">{player.score}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
       
       {/* Game controls reminder */}
-      {gameState.isGameStarted && !gameState.winner && (
+      {gameState.isGameStarted && !gameState.isGameOver && (
         <div className="controls-reminder">
           <p>
             <strong>Arrow Keys</strong>: Move | 
@@ -112,19 +90,12 @@ const GameUI: React.FC<GameUIProps> = ({ players, gameState, onStartGame }) => {
       )}
       
       {/* Game over message */}
-      {gameState.winner !== null && (
+      {gameState.isGameOver && (
         <div className="game-over">
           <h2>Game Over!</h2>
-          <p>Player {gameState.winner} wins!</p>
-          <p>Final Scores:</p>
-          <div className="final-scores">
-            {players.map(player => (
-              <div key={player.id} style={{ color: player.color }}>
-                Player {player.id}: {player.score} points
-              </div>
-            ))}
-          </div>
-          <button className="restart-button" onClick={onStartGame}>
+          <p>Time's up!</p>
+          <p style={{ color: 'black' }}>{players[0].name}'s Final Score: {players[0].score} points</p>
+          <button className="restart-button" onClick={() => onStartGame(players[0].name)}>
             Play Again
           </button>
         </div>

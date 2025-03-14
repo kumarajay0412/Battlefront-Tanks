@@ -19,7 +19,7 @@ const BALLOON_COLORS = [
 ];
 
 // Balloon shape variants
-type BalloonVariant = 'classic' | 'teardrop' | 'tiered' | 'heart' | 'elongated';
+export type BalloonVariant = 'classic' | 'teardrop' | 'tiered' | 'heart' | 'elongated';
 
 interface BalloonProps {
   position: [number, number, number];
@@ -215,7 +215,7 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         [0.7, 0.7], [0.7, -0.7], [-0.7, 0.7], [-0.7, -0.7]
       ].map(([x, z], index) => (
         <mesh key={`rope-${index}`} position={[x * scale, -2.5 * scale, z * scale]}>
-          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 3 * scale, 8]} />
+          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 6 * scale, 8]} />
           <meshStandardMaterial color="#996633" roughness={1} />
         </mesh>
       ))}
@@ -280,7 +280,7 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         [0.6, 0.6], [0.6, -0.6], [-0.6, 0.6], [-0.6, -0.6]
       ].map(([x, z], index) => (
         <mesh key={`rope-${index}`} position={[x * scale, -3 * scale, z * scale]}>
-          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 3 * scale, 8]} />
+          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 6 * scale, 8]} />
           <meshStandardMaterial color="#996633" roughness={1} />
         </mesh>
       ))}
@@ -351,7 +351,7 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         [0.7, 0.7], [0.7, -0.7], [-0.7, 0.7], [-0.7, -0.7]
       ].map(([x, z], index) => (
         <mesh key={`rope-${index}`} position={[x * scale, -3.8 * scale, z * scale]}>
-          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 3.5 * scale, 8]} />
+          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 6.5 * scale, 8]} />
           <meshStandardMaterial color="#996633" roughness={1} />
         </mesh>
       ))}
@@ -361,9 +361,9 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
   // Render the Heart shaped balloon
   const renderHeartBalloon = () => (
     <group position={[0, 3 * scale, 0]}>
-      {/* Left lobe of heart */}
-      <mesh position={[-0.9 * scale, 0.7 * scale, 0]} rotation={[0, 0, Math.PI/4]} onClick={handleBurst}>
-        <sphereGeometry args={[1.5 * scale, 32, 32]} />
+      {/* Left lobe of heart - adjusted position and rotation */}
+      <mesh position={[-0.8 * scale, 1.2 * scale, 0]} rotation={[0, 0, -Math.PI/4]} onClick={handleBurst}>
+        <sphereGeometry args={[1.2 * scale, 32, 32]} />
         <meshStandardMaterial 
           color={balloonColor} 
           emissive={balloonColor} 
@@ -372,9 +372,9 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         />
       </mesh>
       
-      {/* Right lobe of heart */}
-      <mesh position={[0.9 * scale, 0.7 * scale, 0]} rotation={[0, 0, -Math.PI/4]} onClick={handleBurst}>
-        <sphereGeometry args={[1.5 * scale, 32, 32]} />
+      {/* Right lobe of heart - adjusted position and rotation */}
+      <mesh position={[0.8 * scale, 1.2 * scale, 0]} rotation={[0, 0, Math.PI/4]} onClick={handleBurst}>
+        <sphereGeometry args={[1.2 * scale, 32, 32]} />
         <meshStandardMaterial 
           color={balloonColor} 
           emissive={balloonColor} 
@@ -383,9 +383,9 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         />
       </mesh>
       
-      {/* Bottom point of heart */}
-      <mesh position={[0, -1.2 * scale, 0]} rotation={[0, 0, Math.PI/4]}>
-        <coneGeometry args={[2 * scale, 3 * scale, 32, 1]} />
+      {/* Bottom point of heart - adjusted shape and position */}
+      <mesh position={[0, 0, 0]} rotation={[0, 0, Math.PI]} onClick={handleBurst}>
+        <coneGeometry args={[1.6 * scale, 2.4 * scale, 32]} />
         <meshStandardMaterial 
           color={balloonColor} 
           emissive={balloonColor} 
@@ -394,9 +394,9 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         />
       </mesh>
       
-      {/* Decorative trims */}
-      <mesh position={[0, -0.5 * scale, 0]} rotation={[Math.PI/2, 0, 0]}>
-        <torusGeometry args={[1.7 * scale, 0.1 * scale, 16, 32]} />
+      {/* Decorative trim at the connection point */}
+      <mesh position={[0, 0.6 * scale, 0]} rotation={[Math.PI/2, 0, 0]}>
+        <torusGeometry args={[1.2 * scale, 0.1 * scale, 16, 32]} />
         <meshStandardMaterial color={getAccentColor()} />
       </mesh>
       
@@ -411,7 +411,7 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         [0.6, 0.6], [0.6, -0.6], [-0.6, 0.6], [-0.6, -0.6]
       ].map(([x, z], index) => (
         <mesh key={`rope-${index}`} position={[x * scale, -2.5 * scale, z * scale]}>
-          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 3 * scale, 8]} />
+          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 6 * scale, 8]} />
           <meshStandardMaterial color="#996633" roughness={1} />
         </mesh>
       ))}
@@ -461,7 +461,7 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
         [0.5, 0.5], [0.5, -0.5], [-0.5, 0.5], [-0.5, -0.5]
       ].map(([x, z], index) => (
         <mesh key={`rope-${index}`} position={[x * scale, -4.5 * scale, z * scale]}>
-          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 4 * scale, 8]} />
+          <cylinderGeometry args={[0.03 * scale, 0.03 * scale, 7 * scale, 8]} />
           <meshStandardMaterial color="#996633" roughness={1} />
         </mesh>
       ))}
@@ -485,54 +485,64 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
       {renderBalloonShape()}
       
       {/* Basket is common for all balloon types */}
-      <group position={[0, -0.5 * scale, 0]}>
+      <group position={[0, 0, 0]}>
         {/* Basket container */}
-        <mesh>
+        <mesh position={[0, -3.5 * scale, 0]}>
           <boxGeometry args={[1.4 * scale, 1 * scale, 1.4 * scale]} />
           <meshStandardMaterial color="#8B4513" roughness={0.9} />
         </mesh>
         
         {/* Basket interior */}
-        <mesh position={[0, 0.1 * scale, 0]}>
+        <mesh position={[0, -3.4 * scale, 0]}>
           <boxGeometry args={[1.2 * scale, 0.8 * scale, 1.2 * scale]} />
           <meshStandardMaterial color="#A0522D" roughness={0.8} />
         </mesh>
         
         {/* Wicker pattern (simplified) */}
         {[...Array(3)].map((_, idx) => (
-          <mesh key={`wicker-h-${idx}`} position={[0, (-0.3 + idx * 0.3) * scale, 0.7 * scale]}>
+          <mesh key={`wicker-h-${idx}`} position={[0, (-3.8 + idx * 0.3) * scale, 0.7 * scale]}>
             <boxGeometry args={[1.4 * scale, 0.05 * scale, 0.02 * scale]} />
             <meshStandardMaterial color="#6B4226" />
           </mesh>
         ))}
         {[...Array(3)].map((_, idx) => (
-          <mesh key={`wicker-h-back-${idx}`} position={[0, (-0.3 + idx * 0.3) * scale, -0.7 * scale]}>
+          <mesh key={`wicker-h-back-${idx}`} position={[0, (-3.8 + idx * 0.3) * scale, -0.7 * scale]}>
             <boxGeometry args={[1.4 * scale, 0.05 * scale, 0.02 * scale]} />
             <meshStandardMaterial color="#6B4226" />
           </mesh>
         ))}
         {[...Array(3)].map((_, idx) => (
-          <mesh key={`wicker-v-${idx}`} position={[0.7 * scale, (-0.3 + idx * 0.3) * scale, 0]}>
+          <mesh key={`wicker-v-${idx}`} position={[0.7 * scale, (-3.8 + idx * 0.3) * scale, 0]}>
             <boxGeometry args={[0.02 * scale, 0.05 * scale, 1.4 * scale]} />
             <meshStandardMaterial color="#6B4226" />
           </mesh>
         ))}
         {[...Array(3)].map((_, idx) => (
-          <mesh key={`wicker-v-back-${idx}`} position={[-0.7 * scale, (-0.3 + idx * 0.3) * scale, 0]}>
+          <mesh key={`wicker-v-back-${idx}`} position={[-0.7 * scale, (-3.8 + idx * 0.3) * scale, 0]}>
             <boxGeometry args={[0.02 * scale, 0.05 * scale, 1.4 * scale]} />
             <meshStandardMaterial color="#6B4226" />
           </mesh>
         ))}
         
         {/* Burner flame */}
-        <mesh position={[0, 0.8 * scale, 0]}>
-          <coneGeometry args={[0.2 * scale, 0.4 * scale, 8]} />
+        <mesh position={[0, -3.0 * scale, 0]}>
+          <coneGeometry args={[0.3 * scale, 0.6 * scale, 8]} />
           <meshStandardMaterial 
-            color="orange" 
-            emissive="orange"
-            emissiveIntensity={1}
+            color="#FFA500" 
+            emissive="#FF4500"
+            emissiveIntensity={2}
+            transparent={true}
+            opacity={0.8}
           />
         </mesh>
+        
+        {/* Additional glow effect for the flame */}
+        <pointLight
+          position={[0, -3.0 * scale, 0]}
+          color="#FF6B00"
+          intensity={0.5}
+          distance={2 * scale}
+        />
       </group>
       
       {/* Physics body - invisible but handles collisions */}
