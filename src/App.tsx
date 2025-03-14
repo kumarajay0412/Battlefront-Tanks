@@ -2,7 +2,7 @@ import { Canvas } from '@react-three/fiber'
 import { Sky, OrbitControls, Cloud, Stars } from '@react-three/drei'
 import { Physics } from '@react-three/cannon'
 import './App.css'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, memo } from 'react'
 
 // Components
 import Battlefield from './components/Battlefield'
@@ -53,6 +53,15 @@ const generateBalloonPositions = (count: number) => {
   
   return positions
 }
+
+// Memoize the Battlefield component to prevent unnecessary re-renders
+const MemoizedBattlefield = memo(Battlefield);
+// Memoize the Water component to prevent unnecessary re-renders
+const MemoizedWater = memo(Water);
+// Memoize the Tank component to prevent unnecessary re-renders
+const MemoizedTank = memo(Tank);
+// Memoize the Balloon component to prevent unnecessary re-renders
+const MemoizedBalloon = memo(Balloon);
 
 function App() {
   // Normal game state
@@ -131,10 +140,10 @@ function App() {
           }}
         >
           {/* Battlefield with terrain, trees, and other elements */}
-          <Battlefield />
+          <MemoizedBattlefield />
           
           {/* Ocean water surrounding the battlefield */}
-          <Water 
+          <MemoizedWater 
             position={[0, -1, 0]} 
             size={500} 
             color="#4a95e6" 
@@ -143,7 +152,7 @@ function App() {
           
           {/* Player tanks */}
           {players.map(player => (
-            <Tank
+            <MemoizedTank
               key={player.id}
               position={player.position}
               rotation={player.rotation}
@@ -156,14 +165,15 @@ function App() {
           ))}
           
           {/* Balloons */}
-          {balloons.filter(balloon => !balloon.isBurst).map(balloon => (
-            <Balloon
+          {balloons.map(balloon => (
+            <MemoizedBalloon
               key={balloon.id}
               id={balloon.id}
               position={balloon.position}
               color={balloon.color}
               points={balloon.points}
               onBurst={(points) => handleBalloonBurst(points, balloon.id)}
+              isBurst={balloon.isBurst}
             />
           ))}
         </Physics>

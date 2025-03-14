@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, memo } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useBox } from '@react-three/cannon'
 import { Html } from '@react-three/drei'
@@ -1045,4 +1045,18 @@ const Tank: React.FC<TankProps> = ({
   )
 }
 
-export default Tank 
+// Memoize the Tank component with a custom comparison function
+export default memo(Tank, (prevProps, nextProps) => {
+  // Only re-render if these props change
+  return (
+    prevProps.position[0] === nextProps.position[0] &&
+    prevProps.position[1] === nextProps.position[1] &&
+    prevProps.position[2] === nextProps.position[2] &&
+    prevProps.rotation[0] === nextProps.rotation[0] &&
+    prevProps.rotation[1] === nextProps.rotation[1] &&
+    prevProps.rotation[2] === nextProps.rotation[2] &&
+    prevProps.health === nextProps.health &&
+    prevProps.isCurrentPlayer === nextProps.isCurrentPlayer &&
+    prevProps.color === nextProps.color
+  );
+}); 

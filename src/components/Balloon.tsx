@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, memo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { useSphere, useBox } from '@react-three/cannon';
@@ -29,6 +29,7 @@ interface BalloonProps {
   id: number;
   variant?: BalloonVariant;
   scale?: number;
+  isBurst?: boolean;
 }
 
 const HotAirBalloon: React.FC<BalloonProps> = ({ 
@@ -38,11 +39,11 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
   onBurst, 
   id, 
   variant = 'classic',
-  scale = 1.0
+  scale = 1.0,
+  isBurst = false
 }) => {
   // If no color provided, pick one from our pastel palette
   const balloonColor = color || BALLOON_COLORS[id % BALLOON_COLORS.length];
-  const [isBurst, setIsBurst] = useState(false);
   const [showPoints, setShowPoints] = useState(false);
   const [floatOffset, setFloatOffset] = useState(0);
   const initialY = position[1];
@@ -79,6 +80,14 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
       }
     },
   }));
+  
+  // Remove physics body when balloon is burst
+  useEffect(() => {
+    if (isBurst) {
+      // Remove the physics body when the balloon is burst
+      api.position.set(0, -1000, 0); // Move it far away
+    }
+  }, [isBurst, api]);
   
   // Floating animation
   useFrame((state) => {
@@ -126,7 +135,6 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
   
   // Handle balloon burst
   const handleBurst = () => {
-    setIsBurst(true);
     setShowPoints(true);
     
     // Call the onBurst callback with points
@@ -536,4 +544,5 @@ const HotAirBalloon: React.FC<BalloonProps> = ({
   );
 };
 
-export default HotAirBalloon; 
+// Export a memoized version of the component
+export default memo(HotAirBalloon); 
