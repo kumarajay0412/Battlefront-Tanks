@@ -1,98 +1,137 @@
-# Battlefront Tanks
+# 🎮 Battlefront Tanks
 
-A 3D multiplayer tank battle game built with React, Three.js, and React Three Fiber.
+A thrilling 3D tank game where you shoot colorful balloons in a beautiful environment within a time limit. Built with React Three Fiber and Supabase for score tracking.
 
-## Features
+![Battlefront Tanks Game](./screenshot.png)
 
-- 3D tank battle game with physics
-- Multiple players with turn-based gameplay
-- Tank movement and shooting mechanics
-- Health system and game state management
-- Responsive UI with game instructions
+## 🎯 Game Overview
 
-## Technologies Used
+Battlefront Tanks is a fast-paced, arcade-style tank game where players aim to score as many points as possible by shooting balloons of different shapes, colors, and point values within a 60-second time limit.
 
-- React
-- TypeScript
-- Three.js
-- React Three Fiber
-- React Three Drei
-- React Three Cannon (physics)
-- Vite
+### 🎈 Balloon Types & Points
 
-## Getting Started
+- Classic Pink Balloon: 10 points
+- Teardrop Green Balloon: 15 points
+- Tiered Blue Balloon: 20 points
+- Heart Yellow Balloon: 25 points
+- Elongated Purple Balloon: 30 points
+- Special Orange Balloon: 50 points
 
-### Prerequisites
+## 🎲 How to Play
 
-- Node.js (v14 or higher)
-- npm or yarn
+1. **Start Game**
+   - Enter your username to begin
+   - The game starts immediately with a 60-second timer
 
-### Installation
+2. **Controls**
+   - WASD: Move the tank
+   - Mouse: Aim the turret
+   - Left Click: Shoot
+   - Mouse Wheel: Zoom in/out
+   - Right Click + Mouse: Rotate camera
+
+3. **Scoring**
+   - Shoot balloons to score points
+   - Different balloon types give different points
+   - Try to get the highest score before time runs out
+   - Your score is saved to the global leaderboard
+
+## 🚀 Features
+
+- Beautiful 3D environment with dynamic lighting
+- Ghibli-style clouds and atmospheric effects
+- Physics-based tank movement and shooting
+- Global leaderboard system
+- Different balloon types with varying point values
+- Real-time score tracking
+- Countdown timer with visual warnings
+- Background music and sound effects
+
+## 🛠️ Technical Stack
+
+- React + TypeScript
+- Three.js with React Three Fiber
+- @react-three/cannon for physics
+- @react-three/drei for 3D utilities
+- Supabase for backend and leaderboard
+- Vite for build tooling
+
+## 📥 Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/battlefront-tanks.git
-cd battlefront-tanks
+git clone https://github.com/yourusername/Battlefront-Tanks.git
 ```
 
 2. Install dependencies:
 ```bash
+cd Battlefront-Tanks
 npm install
 ```
 
-3. Start the development server:
+3. Create a Supabase project and update the configuration in `src/lib/supabase.ts` with your project URL and anon key.
+
+4. Start the development server:
 ```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+## 🌐 Deployment
 
-## How to Play
-
-- Use **W, A, S, D** keys to move your tank:
-  - **W**: Move forward
-  - **S**: Move backward
-  - **A**: Turn left
-  - **D**: Turn right
-- Press **Spacebar** to shoot
-- Destroy enemy tanks to win!
-
-## Game Controls
-
-| Key       | Action       |
-|-----------|--------------|
-| W         | Move forward |
-| S         | Move backward|
-| A         | Turn left    |
-| D         | Turn right   |
-| Spacebar  | Shoot        |
-
-## Project Structure
-
-```
-battlefront-tanks/
-├── public/
-│   └── textures/        # Game textures
-├── src/
-│   ├── components/      # React components
-│   │   ├── Battlefield.tsx
-│   │   ├── GameUI.tsx
-│   │   ├── Projectile.tsx
-│   │   └── Tank.tsx
-│   ├── hooks/           # Custom React hooks
-│   │   └── useKeyboardControls.ts
-│   ├── App.css          # Main styles
-│   ├── App.tsx          # Main component
-│   └── main.tsx         # Entry point
-└── package.json         # Dependencies and scripts
+To build for production:
+```bash
+npm run build
 ```
 
-## License
+Or to build without linting:
+```bash
+npm run build-no-lint
+```
+
+## 📝 Database Schema
+
+The game uses a Supabase table with the following structure:
+
+```sql
+CREATE TABLE scores (
+  id SERIAL PRIMARY KEY,
+  user_name TEXT NOT NULL,
+  score INTEGER NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL
+);
+```
+
+## 🎨 Environment
+
+The game features:
+- Dynamic sky with stars
+- Animated water
+- Ghibli-style clouds
+- Realistic tank physics
+- Particle effects for explosions
+- Ambient and directional lighting
+
+## 🔧 Performance Optimization
+
+- Memoized components for better performance
+- Efficient physics calculations
+- Optimized 3D models and textures
+- FPS counter for monitoring performance
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📜 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-- Three.js for 3D rendering
-- React Three Fiber for React integration
-- React Three Cannon for physics
+- Three.js community
+- React Three Fiber team
+- Supabase team
+- All contributors and testers
+
+---
+Made with ❤️ by [Your Name]
