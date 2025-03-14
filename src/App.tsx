@@ -28,16 +28,16 @@ const BOUNDARY_MARGIN = 10 // Keep tanks this far from the edge
 
 // Cloud configuration for Ghibli-style clouds
 const CLOUD_CONFIGS = [
-  { position: [-20, 38, -20] as [number, number, number], scale: 3, opacity: 0.6, speed: 0.02, segments: 40 },
-  { position: [20, 38, 20] as [number, number, number], scale: 4, opacity: 0.7, speed: 0.015, segments: 50 },
-  { position: [0, 38, 0] as [number, number, number], scale: 5, opacity: 0.5, speed: 0.01, segments: 60 },
-  { position: [-30, 38, 10] as [number, number, number], scale: 2.5, opacity: 0.8, speed: 0.025, segments: 35 },
-  { position: [25, 40, -15] as [number, number, number], scale: 3.5, opacity: 0.65, speed: 0.018, segments: 45 },
-  { position: [-15, 45, 25] as [number, number, number], scale: 3.2, opacity: 0.7, speed: 0.022, segments: 42 },
-  { position: [15, 45, -25] as [number, number, number], scale: 4.2, opacity: 0.6, speed: 0.012, segments: 55 },
-  { position: [-25, 40, -5] as [number, number, number], scale: 3.8, opacity: 0.75, speed: 0.017, segments: 48 },
-  { position: [30, 40, 5] as [number, number, number], scale: 2.8, opacity: 0.8, speed: 0.023, segments: 38 },
-  { position: [0, 40, 30] as [number, number, number], scale: 4.5, opacity: 0.55, speed: 0.014, segments: 52 }
+  { position: [-20, 38, -20] as [number, number, number], scale: 3, opacity: 0.6, segments: 40 },
+  { position: [20, 38, 20] as [number, number, number], scale: 4, opacity: 0.7, segments: 50 },
+  { position: [0, 38, 0] as [number, number, number], scale: 5, opacity: 0.5, segments: 60 },
+  { position: [-30, 38, 10] as [number, number, number], scale: 2.5, opacity: 0.8, segments: 35 },
+  { position: [25, 40, -15] as [number, number, number], scale: 3.5, opacity: 0.65, segments: 45 },
+  { position: [-15, 45, 25] as [number, number, number], scale: 3.2, opacity: 0.7, segments: 42 },
+  { position: [15, 45, -25] as [number, number, number], scale: 4.2, opacity: 0.6, segments: 55 },
+  { position: [-25, 40, -5] as [number, number, number], scale: 3.8, opacity: 0.75, segments: 48 },
+  { position: [30, 40, 5] as [number, number, number], scale: 2.8, opacity: 0.8, segments: 38 },
+  { position: [0, 40, 30] as [number, number, number], scale: 4.5, opacity: 0.55, segments: 52 }
 ]
 
 // Balloon configurations with pastel colors and different shapes
@@ -170,10 +170,8 @@ function App() {
     scale: number;
   }>>([])
   
-  // Cloud animation state
-  const [cloudPositions, setCloudPositions] = useState<[number, number, number][]>(
-    CLOUD_CONFIGS.map(config => [...config.position] as [number, number, number])
-  )
+  // Remove cloud animation state since we don't need it anymore
+  const cloudPositions = CLOUD_CONFIGS.map(config => config.position)
   
   // Handle balloon burst
   const handleBalloonBurst = useCallback((points: number, balloonId: number) => {
@@ -406,11 +404,11 @@ function App() {
             rayleigh={0.5}
           />
           
-          {/* Ghibli-style clouds with React.memo */}
+          {/* Static clouds */}
           {CLOUD_CONFIGS.map((config, index) => (
             <Cloud
               key={`cloud-${index}`}
-              position={cloudPositions[index]}
+              position={config.position}
               opacity={config.opacity}
               speed={0}
               segments={config.segments}
